@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/rishovpaul/CLionProjects/GraphicsOffline2/main.cpp
+iostream
+-
+iomanip
+-
+cmath
+-
+cstdio
+-
+vector
+-
+stack
+-
+
