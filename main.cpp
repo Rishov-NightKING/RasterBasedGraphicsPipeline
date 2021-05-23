@@ -31,10 +31,9 @@ public:
 
     void printPoint() const
     {
-        cout << "(" << setprecision(2) << fixed << this->x << ", "
-            <<setprecision(2) << fixed << this->y << ", "
-            << setprecision(2) << fixed << this->z << ", "
-            << setprecision(2) << fixed << this->w << ")" << endl;
+        cout << "(" << setprecision(7) << fixed << this->x << ", "
+            <<setprecision(7) << fixed << this->y << ", "
+            << setprecision(7) << fixed << this->z << ")" << endl;
     }
 };
 
@@ -136,10 +135,46 @@ public:
 
 };
 
+class Triangle{
+
+public:
+    vector<Point> end_points;
+    //0-255
+    vector<int> RGB_color;
+
+    Triangle()
+    {
+        end_points.resize(3);
+        RGB_color.resize(3);
+        for(int i = 0; i < 3; i++)
+        {
+            end_points[i] = Point();
+            RGB_color[i] = 0;
+        }
+    }
+    void print_triangle()
+    {
+        cout << "\nTriangle Info" << endl;
+        for(int i = 0; i < 3; i++)
+        {
+            cout << "Endpoint" << (i + 1) << ": " << endl;
+            end_points[i].printPoint();
+        }
+        cout << "RGB color value:  R: " << RGB_color[0] << "   G: " << RGB_color[1] << "   B: " << RGB_color[2] << endl;
+    }
+
+};
 /************************GLOBAL VARIABLES***************************************/
+int triangles = 0;
 
 Point eye, look, up;
 double fovY, aspectRatio, near, far;
+
+int Screen_Width, Screen_Height;
+double left_limit_X, right_limit_X;
+double bottom_limit_Y, top_limit_Y;
+double front_limit_Z, rear_limit_Z;
+
 stack<Matrix> Stack;
 Matrix V, P;
 
@@ -215,7 +250,6 @@ void gluLookAt()
     cin >> eye.x >> eye.y >> eye.z;
     cin >> look.x >> look.y >> look.z;
     cin >> up.x >> up.y >> up.z;
-
 }
 void gluPerspective()
 {
@@ -277,12 +311,13 @@ int main() {
     string command;
 
     /****************************OPEN FILES***************************************/
-    FILE *scene = freopen("scene.txt", "r", stdin);
+
     FILE *stage1 = fopen("stage1.txt","w");
     FILE *stage2 = fopen("stage2.txt","w");
     FILE *stage3 = fopen("stage3.txt","w");
     /****************************************************************************/
 
+    FILE *scene = freopen("scene.txt", "r", stdin);
     gluLookAt();
     gluPerspective();
     view_transformation();
@@ -298,6 +333,7 @@ int main() {
         if(command == "end") break;
         else if(command == "triangle")
         {
+            triangles++;
             for(int i = 0; i < triangle_vector.getRow() - 1; i++){
                 for(int j = 0; j < triangle_vector.getColumn() - 1; j++)
                 {
@@ -390,15 +426,40 @@ int main() {
         else if(command == "pop")
         {
             if(!Stack.empty()) Stack.pop();
-            else cout << "Pop not possible....Stack empty" <<endl;
+            else cout << "Pop not possible....Stack empty." <<endl;
         }
     }
 
+    //READ config.txt file
+    FILE *config = fopen("config.txt", "r");
+    fscanf(config, "%d %d", &Screen_Width, &Screen_Height);
+    fscanf(config, "%lf", &left_limit_X);
+    fscanf(config, "%lf", &bottom_limit_Y);
+    fscanf(config, "%lf %lf", &front_limit_Z, &rear_limit_Z);
+
+    right_limit_X = left_limit_X * (-1);
+    top_limit_Y = bottom_limit_Y * (-1);
+
+    fclose(stage3);
+    stage3 = fopen("stage3.txt","r");
+
+    while (triangles--)
+    {
+        Triangle triangle;
+        for(int i = 0; i < 3; i++)
+        {
+            fscanf(stage3, "%lf %lf %lf", &triangle.end_points[i].x, &triangle.end_points[i].y, &triangle.end_points[i].z);
+        }
+        triangle.print_triangle();
+    }
     /****************************CLOSE FILES***************************************/
+
+    fclose(config);
     fclose(scene);
     fclose(stage1);
     fclose(stage2);
     fclose(stage3);
+
     /****************************************************************************/
     return 0;
 }
