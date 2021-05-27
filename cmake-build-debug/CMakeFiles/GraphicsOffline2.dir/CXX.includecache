@@ -6,6 +6,24 @@
 
 #IncludeRegexTransform: 
 
+/Users/rishovpaul/CLionProjects/GraphicsOffline2/bitmap_image.hpp
+algorithm
+-
+cmath
+-
+cstdlib
+-
+fstream
+-
+iostream
+-
+iterator
+-
+limits
+-
+string
+-
+
 /Users/rishovpaul/CLionProjects/GraphicsOffline2/main.cpp
 iostream
 -
@@ -19,4 +37,10 @@ vector
 -
 stack
 -
+random
+-
+limits
+-
+bitmap_image.hpp
+/Users/rishovpaul/CLionProjects/GraphicsOffline2/bitmap_image.hpp
 
