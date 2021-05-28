@@ -369,12 +369,14 @@ void print_vector_in_file(FILE *file, vector< vector<double> > vec)
     {
         for(int j = 0; j < Screen_Width ; j++)
         {
-            if(vec[i][j] < rear_limit_Z) fprintf(file, "%.6lf", vec[i][j]);
-            if(j < Screen_Width - 1) fprintf(file, "  ");
+            if(vec[i][j] < rear_limit_Z)
+            {
+                fprintf(file, "%.6lf", vec[i][j]);
+                if(j < Screen_Width - 1) fprintf(file, "\t");
+            }
         }
         fprintf(file, "\n");
     }
-    fprintf(file, "\n");
 }
 int main() {
     Matrix matrix, triangle_vector, mat_proj, mat_view;
@@ -570,13 +572,12 @@ int main() {
        clipping_max_Y = max(triangle_store[i].max_Y, top_Y);
        clipping_min_Y = min(triangle_store[i].min_Y, bottom_Y);
 
-       /*  b. During scanning from top to bottom and left to right, check for the middle values of each
-      cell. e.g. Top_Y- row_no*dy, Left_X + col_no*dx    */
+       /* scanning from top to bottom  */
 
-       top_scanline_row = round((clipping_max_Y - bottom_Y) / dy);
-       bottom_scanline_row = round((clipping_min_Y - bottom_Y) / dy);
+       top_scanline_row = round((top_Y - clipping_max_Y) / dy);
+       bottom_scanline_row = round((top_Y - clipping_min_Y) / dy);
 
-       for(int ys = bottom_scanline_row; ys <= top_scanline_row; ys++)
+       for(int ys = top_scanline_row; ys <= bottom_scanline_row; ys++)
        {
            double const1, const2, const3;
            double x1, x2, x3, y1, y2, y3, z1, z2, z3, xa, xb, xc, za, zb, zc, Za, Zb, Xa, Xb, zp, xp;
@@ -593,7 +594,7 @@ int main() {
            z3 = triangle_store[i].end_points[2].z;
 
 
-           double ysx = bottom_Y + ys * dy;
+           double ysx = top_Y - ys * dy;
            const1 = (ysx - y1) / (y2 - y1);
            const2 = (ysx - y1) / (y3 - y1);
            const3 = (ysx - y2) / (y3 - y2);
@@ -647,7 +648,7 @@ int main() {
                if (zp < z_buffer[ys][xs] && zp > front_limit_Z)
                {
                    z_buffer[ys][xs] = zp;
-                   image.set_pixel(xs, Screen_Height - ys, triangle_store[i].RGB_color[0], triangle_store[i].RGB_color[1],
+                   image.set_pixel(xs, ys, triangle_store[i].RGB_color[0], triangle_store[i].RGB_color[1],
                                    triangle_store[i].RGB_color[2]);
                }
 
@@ -656,6 +657,10 @@ int main() {
     }
     print_vector_in_file(z_buffer_file, z_buffer);
     image.save_image("output_1605084.bmp");
+
+    /*****************************Free Memory***************************************/
+    z_buffer.clear();
+    image.clear();
 
     /****************************CLOSE FILES***************************************/
 
