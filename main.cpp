@@ -411,6 +411,7 @@ int main() {
         else if(command == "triangle")
         {
             triangles++;
+            //cout << "tri : "<<triangles <<endl;
             for(int i = 0; i < triangle_vector.getRow() - 1; i++){
                 for(int j = 0; j < triangle_vector.getColumn() - 1; j++)
                 {
@@ -441,6 +442,7 @@ int main() {
                 mat_proj.scale_matrix_by_column_last();
                 mat_proj.print_matrix_in_file(stage3);
             }
+            //triangle_vector.print_matrix();
 
         }
         else if(command == "translate")
@@ -529,12 +531,14 @@ int main() {
             fscanf(stage3, "%lf %lf %lf", &triangle.end_points[i].x, &triangle.end_points[i].y, &triangle.end_points[i].z);
             triangle.max_X = max(triangle.end_points[i].x, triangle.max_X);
             triangle.max_Y = max(triangle.end_points[i].y, triangle.max_Y);
-            triangle.min_X = max(triangle.end_points[i].x, triangle.min_X);
-            triangle.min_Y = max(triangle.end_points[i].y, triangle.min_Y);
+
+            triangle.min_X = min(triangle.end_points[i].x, triangle.min_X);
+            triangle.min_Y = min(triangle.end_points[i].y, triangle.min_Y);
         }
         triangle.set_random_color();
         triangle_store.push_back(triangle);
     }
+
 
     /* a.Create a pixel mapping between the x-y range values and the Screen_Width X
     Screen_height range.Besides, specify Top_Y and Left_X values. */
@@ -551,6 +555,7 @@ int main() {
     vector< vector<double> > z_buffer(Screen_Height, vector<double>(Screen_Width, rear_limit_Z));
 
 
+
     /* d. Create a bitmap_image object with Screen_Width X Screen_Height resolution and initialize
     its background color with black.*/
     bitmap_image image(Screen_Width, Screen_Height);
@@ -558,7 +563,7 @@ int main() {
     {
         for(int j = 0; j < Screen_Width; j++)
         {
-            image.set_pixel(i , j, 0, 0, 0);
+            image.set_pixel(j , i, 0, 0, 0);
         }
     }
 
@@ -569,11 +574,10 @@ int main() {
     for(int i = 0; i < triangle_store.size(); i++)
     {
        /* Find top_scanline and bottom_scanline after necessary clipping */
-       clipping_max_Y = max(triangle_store[i].max_Y, top_Y);
-       clipping_min_Y = min(triangle_store[i].min_Y, bottom_Y);
+       clipping_max_Y = triangle_store[i].max_Y > top_Y ? top_Y : triangle_store[i].max_Y;
+       clipping_min_Y = triangle_store[i].min_Y < bottom_Y ? bottom_Y : triangle_store[i].min_Y;
 
        /* scanning from top to bottom  */
-
        top_scanline_row = round((top_Y - clipping_max_Y) / dy);
        bottom_scanline_row = round((top_Y - clipping_min_Y) / dy);
 
@@ -636,10 +640,11 @@ int main() {
            Za = intersecting_points[0].z;
            Zb = intersecting_points[1].z;
 
-           left_intersecting_col = round( (max(min(Xa, Xb), left_X ) - left_X) / dx);
-           right_intersecting_col = round( (min(max(Xa, Xb), right_X)  - left_X) / dx);
+           left_intersecting_col = round((max(min(Xa, Xb), left_X) - left_X) / dx);
+           right_intersecting_col = round((min(max(Xa, Xb), right_X)  - left_X) / dx);
 
            double const_zp = (Zb - Za) / (Xb - Xa);
+
            for (int xs = left_intersecting_col; xs <= right_intersecting_col; xs++)
            {
                xp = left_X + xs * dx;
