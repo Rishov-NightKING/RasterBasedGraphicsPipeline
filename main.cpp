@@ -429,7 +429,7 @@ int main() {
     vector<Triangle> triangle_store;
 
     /****************************OPEN FILES***************************************/
-    FILE *scene = freopen("scene4.txt", "r", stdin);
+    FILE *scene = freopen("scene.txt", "r", stdin);
     FILE *stage1 = fopen("stage1.txt","w");
     FILE *stage2 = fopen("stage2.txt","w");
     FILE *stage3 = fopen("stage3.txt","w");
@@ -548,7 +548,7 @@ int main() {
     }
 
     //READ config.txt file
-    FILE *config = fopen("config4.txt", "r");
+    FILE *config = fopen("config.txt", "r");
     fscanf(config, "%d %d", &Screen_Width, &Screen_Height);
     fscanf(config, "%lf", &left_limit_X);
     fscanf(config, "%lf", &bottom_limit_Y);
