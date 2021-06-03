@@ -24,6 +24,28 @@ public:
     }
     Point(double x, double y, double z) : x(x), y(y), z(z), w(1) {}
 
+    Point operator + (const Point& p) const
+    {
+        return Point(x + p.x, y + p.y, z + p.z);
+    }
+
+    Point operator - (const Point& p) const
+    {
+        return Point(x - p.x, y - p.y, z - p.z);
+    }
+
+    template<typename T>
+    Point operator * (T value) const
+    {
+        return Point(x * value, y * value, z * value);
+    }
+
+    bool operator == (const Point& p) const
+    {
+        return (x == p.x && y == p.y && z == p.z);
+    }
+
+
     void normalize_point()
     {
         double value = sqrt(x * x + y * y + z * z);
@@ -37,6 +59,11 @@ public:
         cout << "(" << setprecision(7) << fixed << this->x << ", "
             <<setprecision(7) << fixed << this->y << ", "
             << setprecision(7) << fixed << this->z << ")" << endl;
+    }
+
+    virtual ~Point()
+    {
+        this->x = this->y = this->z = this->w = 0;
     }
 };
 
@@ -136,6 +163,11 @@ public:
         fprintf(file, "\n");
     }
 
+    virtual ~Matrix()
+    {
+        mat.clear();
+    }
+
 };
 
 //C++ Modern approach
@@ -195,6 +227,14 @@ public:
         cout << "RGB color value:  R: " << RGB_color[0] << "   G: " << RGB_color[1] << "   B: " << RGB_color[2] << endl;
         cout << "min_X: " << min_X << "  max_X: " << max_X << endl;
         cout << "min_Y: " << min_Y << "  max_Y: " << max_Y << endl;
+    }
+
+    virtual ~Triangle()
+    {
+        end_points.clear();
+        RGB_color.clear();
+        max_X = max_Y = numeric_limits<double>::min();
+        min_X = min_Y = numeric_limits<double>::max();
     }
 
 };
@@ -261,12 +301,12 @@ void operation_on_matrix(Matrix mat)
     if(Stack.empty()) cout << "Error during modeling transformation....Stack empty" <<endl;
     else
     {
-        Matrix stack_top = matrix_multiply(Stack.top(), mat);
+        mat = matrix_multiply(Stack.top(), mat);
         Stack.pop();
-        Stack.push(stack_top);
+        Stack.push(mat);
     }
 }
-Point Rodrigues_rotation(Point x, Point a, double angle)
+Point Rodrigues_rotation(const Point& x, const Point& a, double angle)
 {
     double sin_theta = sin(degreeToRadianAngle(angle));
     double cos_theta = cos(degreeToRadianAngle(angle));
@@ -275,9 +315,10 @@ Point Rodrigues_rotation(Point x, Point a, double angle)
     Point C = vector_cross_product(a, x);
 
     Point R;
-    R.x = cos_theta * x.x + temp * a.x + sin_theta * C.x;
-    R.y = cos_theta * x.y + temp * a.y + sin_theta * C.y;
-    R.z = cos_theta * x.z + temp * a.z + sin_theta * C.z;
+    R = x * cos_theta + a * temp + C * sin_theta;
+//    R.x = cos_theta * x.x + temp * a.x + sin_theta * C.x;
+//    R.y = cos_theta * x.y + temp * a.y + sin_theta * C.y;
+//    R.z = cos_theta * x.z + temp * a.z + sin_theta * C.z;
 
     return R;
 }
@@ -294,7 +335,8 @@ void gluPerspective()
 void view_transformation()
 {
     //View Transformation
-    Point l = Point(look.x - eye.x, look.y - eye.y, look.z - eye.z);
+    //Point l = Point(look.x - eye.x, look.y - eye.y, look.z - eye.z);
+    Point l = look - eye;
     l.normalize_point();
 
     Point r = vector_cross_product(l, up);
@@ -372,7 +414,7 @@ void print_vector_in_file(FILE *file, vector< vector<double> > vec)
             if(vec[i][j] < rear_limit_Z)
             {
                 fprintf(file, "%.6lf", vec[i][j]);
-                if(j < Screen_Width - 1) fprintf(file, "\t");
+                if(j < Screen_Width) fprintf(file, "\t");
             }
         }
         fprintf(file, "\n");
@@ -387,7 +429,7 @@ int main() {
     vector<Triangle> triangle_store;
 
     /****************************OPEN FILES***************************************/
-    FILE *scene = freopen("scene.txt", "r", stdin);
+    FILE *scene = freopen("scene4.txt", "r", stdin);
     FILE *stage1 = fopen("stage1.txt","w");
     FILE *stage2 = fopen("stage2.txt","w");
     FILE *stage3 = fopen("stage3.txt","w");
@@ -411,7 +453,6 @@ int main() {
         else if(command == "triangle")
         {
             triangles++;
-            //cout << "tri : "<<triangles <<endl;
             for(int i = 0; i < triangle_vector.getRow() - 1; i++){
                 for(int j = 0; j < triangle_vector.getColumn() - 1; j++)
                 {
@@ -421,7 +462,6 @@ int main() {
             for(int i = 0; i < triangle_vector.getRow() - 1; i++)
             {
                 triangle_vector.mat[3][i] = 1;
-                //triangle_vector.mat[i][3] = 1;
             }
 
             if(Stack.empty())
@@ -442,8 +482,6 @@ int main() {
                 mat_proj.scale_matrix_by_column_last();
                 mat_proj.print_matrix_in_file(stage3);
             }
-            //triangle_vector.print_matrix();
-
         }
         else if(command == "translate")
         {
@@ -510,7 +548,7 @@ int main() {
     }
 
     //READ config.txt file
-    FILE *config = fopen("config.txt", "r");
+    FILE *config = fopen("config4.txt", "r");
     fscanf(config, "%d %d", &Screen_Width, &Screen_Height);
     fscanf(config, "%lf", &left_limit_X);
     fscanf(config, "%lf", &bottom_limit_Y);
