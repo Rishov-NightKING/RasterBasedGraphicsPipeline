@@ -123,7 +123,7 @@ public:
 
     void scale_matrix_by_column_last()
     {
-        for(int i = 0; i < column - 1; i++)
+        for(int i = 0; i < column; i++)
         {
             double column_last = mat[row - 1][i];
             if(column_last != 1)
@@ -153,10 +153,10 @@ public:
         //(n - 1) X (n - 1) vector matrix print in file
         for(int i = 0; i < row - 1; i++)
         {
-            for(int j = 0; j < column - 1; j++)
+            for(int j = 0; j < column; j++)
             {
                 fprintf(file, "%.7lf", mat[j][i]);
-                if(j < column - 2) fprintf(file, " ");
+                if(j < column - 1) fprintf(file, " ");
             }
             fprintf(file, "\n");
         }
@@ -421,7 +421,7 @@ void print_vector_in_file(FILE *file, vector< vector<double> > vec)
     }
 }
 int main() {
-    Matrix matrix, triangle_vector, mat_proj, mat_view;
+    Matrix matrix, triangle_vector(4, 3), mat_proj, mat_view;
     double x, y, z, angle;
     double dx, dy;
     double top_Y, bottom_Y, left_X, right_X;
@@ -453,13 +453,13 @@ int main() {
         else if(command == "triangle")
         {
             triangles++;
-            for(int i = 0; i < triangle_vector.getRow() - 1; i++){
-                for(int j = 0; j < triangle_vector.getColumn() - 1; j++)
+            for(int i = 0; i < triangle_vector.getColumn(); i++){
+                for(int j = 0; j < triangle_vector.getRow() - 1; j++)
                 {
                     cin >> triangle_vector.mat[j][i];
                 }
             }
-            for(int i = 0; i < triangle_vector.getRow() - 1; i++)
+            for(int i = 0; i < triangle_vector.getColumn(); i++)
             {
                 triangle_vector.mat[3][i] = 1;
             }
